@@ -15,6 +15,8 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
+    <Folder Include="Domain\Services\" />
+    <Folder Include="Infra\" />
   </ItemGroup>
 
 </Project>
