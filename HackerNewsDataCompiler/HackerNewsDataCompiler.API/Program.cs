@@ -1,3 +1,7 @@
+using HackerNewsDataCompiler.API.Domain.Interfaces;
+using HackerNewsDataCompiler.API.Domain.Services;
+using HackerNewsDataCompiler.API.Infra;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,6 +9,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddHttpClient(StoryRepository.HttpClientName, client =>
+{
+    var baseAddress = builder.Configuration["HackerNewsBaseAddressV0"]!.TrimEnd('/') + "/";
+    client.BaseAddress = new Uri(baseAddress);
+});
+
+builder.Services.AddScoped<IStoryRepository, StoryRepository>();
+builder.Services.AddScoped<IStoryService, StoriesService>();
 
 var app = builder.Build();
 
