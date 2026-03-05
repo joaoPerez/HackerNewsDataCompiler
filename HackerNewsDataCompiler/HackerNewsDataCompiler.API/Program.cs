@@ -2,6 +2,7 @@ using HackerNewsDataCompiler.API.Domain.Interfaces;
 using HackerNewsDataCompiler.API.Domain.Services;
 using HackerNewsDataCompiler.API.Infra;
 using HackerNewsDataCompiler.API.Middleware;
+using Microsoft.Extensions.Caching.Memory;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,13 +15,23 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
+builder.Services.AddMemoryCache();
+builder.Services.Configure<HackerNewsCacheOptions>(
+    builder.Configuration.GetSection(HackerNewsCacheOptions.SectionName));
+
 builder.Services.AddHttpClient(StoryRepository.HttpClientName, client =>
 {
     var baseAddress = builder.Configuration["HackerNewsBaseAddressV0"]!.TrimEnd('/') + "/";
     client.BaseAddress = new Uri(baseAddress);
 });
 
-builder.Services.AddScoped<IStoryRepository, StoryRepository>();
+builder.Services.AddScoped<StoryRepository>();
+builder.Services.AddScoped<IStoryRepository, CachedStoryRepository>(sp =>
+    new CachedStoryRepository(
+        sp.GetRequiredService<StoryRepository>(),
+        sp.GetRequiredService<IMemoryCache>(),
+        sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<HackerNewsCacheOptions>>()));
+
 builder.Services.AddScoped<IStoryService, StoriesService>();
 
 var app = builder.Build();
