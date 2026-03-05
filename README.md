@@ -39,6 +39,7 @@ docker compose up -d --build
 ```
 
 The API will be available at **http://localhost:8080**.
+With Swagger: **http://localhost:8080/swagger**.
 
 ### 4. Stop the container
 
@@ -61,8 +62,7 @@ dotnet run
 ```
 
 The API will start at **http://localhost:5156** (HTTP) or **https://localhost:7249** (HTTPS).
-
-The Swagger UI will open automatically at `http://localhost:5156/swagger`.
+With Swagger: **http://localhost:5156/swagger** (HTTP) or **https://localhost:7249/swagger**.
 
 ---
 
