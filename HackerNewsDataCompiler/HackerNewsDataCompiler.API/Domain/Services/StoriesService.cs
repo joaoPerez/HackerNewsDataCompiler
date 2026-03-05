@@ -1,5 +1,6 @@
 ﻿using HackerNewsDataCompiler.API.Domain.Entities;
 using HackerNewsDataCompiler.API.Domain.Interfaces;
+using HackerNewsDataCompiler.API.Domain.Models;
 
 namespace HackerNewsDataCompiler.API.Domain.Services
 {
@@ -12,22 +13,29 @@ namespace HackerNewsDataCompiler.API.Domain.Services
             _storyRepository = storyRepository;
         }
 
-        public async Task<IEnumerable<int>> GetBestStoriesIDs()
+        public async Task<ResponseModel<IEnumerable<int>>> GetBestStoriesIDs()
         {
             var response = await _storyRepository.GetBestStoriesIds();
-            return response;
+            if (!response.IsSuccess)
+                return ResponseModel<IEnumerable<int>>.Failure(response.ErrorStatusCode!.Value, response.ErrorMessage!);
+
+            return ResponseModel<IEnumerable<int>>.Success(response.Data!);
         }
 
-        public async Task<IEnumerable<Story>> GetBestStoriesDetails(int[] storiesIds)
+        public async Task<ResponseModel<IEnumerable<Story>>> GetBestStoriesDetails(int[] storiesIds)
         {
             var storiesDetails = new List<Story>();
+
             foreach (var storyId in storiesIds)
             {
-               var storyDto = await _storyRepository.GetStoryDetails(storyId);
-               storiesDetails.Add(storyDto.ToStory());
+                var response = await _storyRepository.GetStoryDetails(storyId);
+                if (!response.IsSuccess)
+                    return ResponseModel<IEnumerable<Story>>.Failure(response.ErrorStatusCode!.Value, response.ErrorMessage!);
+
+                storiesDetails.Add(response.Data!.ToStory());
             }
 
-            return storiesDetails;
+            return ResponseModel<IEnumerable<Story>>.Success(storiesDetails);
         }
     }
 }

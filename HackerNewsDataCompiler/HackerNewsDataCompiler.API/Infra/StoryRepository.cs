@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using HackerNewsDataCompiler.API.Domain.Dtos;
 using HackerNewsDataCompiler.API.Domain.Interfaces;
+using HackerNewsDataCompiler.API.Domain.Models;
 
 namespace HackerNewsDataCompiler.API.Infra
 {
@@ -15,20 +16,36 @@ namespace HackerNewsDataCompiler.API.Infra
             _httpClient = httpClientFactory.CreateClient(HttpClientName);
         }
 
-        public async Task<List<int>> GetBestStoriesIds()
+        public async Task<ResponseModel<List<int>>> GetBestStoriesIds()
         {
             var response = await _httpClient.GetAsync("beststories.json");
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<List<int>>();
+
+            if (!response.IsSuccessStatusCode)
+                return ResponseModel<List<int>>.Failure(
+                    (int)response.StatusCode,
+                    $"Failed to retrieve best story IDs. HackerNews API responded with {(int)response.StatusCode}.");
+
+            var data = await response.Content.ReadFromJsonAsync<List<int>>();
+            if (data is null)
+                return ResponseModel<List<int>>.Failure(500, "Failed to deserialize best story IDs from HackerNews API.");
+
+            return ResponseModel<List<int>>.Success(data);
         }
 
-        public async Task<StoryDto> GetStoryDetails(int storyId)
+        public async Task<ResponseModel<StoryDto>> GetStoryDetails(int storyId)
         {
             var response = await _httpClient.GetAsync($"item/{storyId}.json");
 
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+                return ResponseModel<StoryDto>.Failure(
+                    (int)response.StatusCode,
+                    $"Failed to retrieve details for story {storyId}. HackerNews API responded with {(int)response.StatusCode}.");
 
-            return await response.Content.ReadFromJsonAsync<StoryDto>();
+            var data = await response.Content.ReadFromJsonAsync<StoryDto>();
+            if (data is null)
+                return ResponseModel<StoryDto>.Failure(500, $"Failed to deserialize details for story {storyId} from HackerNews API.");
+
+            return ResponseModel<StoryDto>.Success(data);
         }
     }
 }

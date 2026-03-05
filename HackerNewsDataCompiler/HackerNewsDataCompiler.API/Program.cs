@@ -1,6 +1,7 @@
 using HackerNewsDataCompiler.API.Domain.Interfaces;
 using HackerNewsDataCompiler.API.Domain.Services;
 using HackerNewsDataCompiler.API.Infra;
+using HackerNewsDataCompiler.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddHttpClient(StoryRepository.HttpClientName, client =>
 {
@@ -21,7 +25,7 @@ builder.Services.AddScoped<IStoryService, StoriesService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
@@ -29,7 +33,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "HackerNewsDataCompiler API v1");
-        options.RoutePrefix = string.Empty;
     });
 }
 

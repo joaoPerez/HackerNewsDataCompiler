@@ -1,10 +1,11 @@
 ﻿using HackerNewsDataCompiler.API.Domain.Dtos;
+using HackerNewsDataCompiler.API.Domain.Models;
 
 namespace HackerNewsDataCompiler.API.Domain.Interfaces
 {
     public interface IStoryRepository
     {
-        Task<StoryDto> GetStoryDetails(int storyId);
-        Task<List<int>> GetBestStoriesIds();
+        Task<ResponseModel<StoryDto>> GetStoryDetails(int storyId);
+        Task<ResponseModel<List<int>>> GetBestStoriesIds();
     }
 }
