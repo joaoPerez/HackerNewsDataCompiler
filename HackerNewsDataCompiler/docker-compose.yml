@@ -1,0 +1,11 @@
+services:
+  hackernewsdatacompiler.api:
+    container_name: hackernews-api
+    image: hackernewsdatacompiler-api
+    build:
+      context: .
+      dockerfile: HackerNewsDataCompiler.API/Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
